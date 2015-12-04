@@ -19,11 +19,13 @@ class Scitosa5(Robot):
     VIDEOCAM_TOPIC_SUFFIX = '/image_mono'
     SEMANTICCAM_TOPIC     = '/semcam'
     DEPTHCAM_TOPIC        = '/head_xtion/depth/points'
+    CHESTHCAM_TOPIC        = '/head_xtion/depth/points'
 
     # frame id's
     DEPTHCAM_FRAME_ID = 'head_xtion_depth_optical_frame'
     VIDEOCAM_FRAME_ID = 'head_xtion_rgb_optical_frame'
     SEMANTICCAM_FRAME_ID = '/head_xtion_rgb_optical_frame'
+    CHESTCAM_FRAME_ID = 'chest_xtion_depth_optical_frame'
 
     """
     A template robot model for scitosA5
@@ -145,3 +147,21 @@ class Scitosa5(Robot):
 
                 self.depthcam.rotate(0, 0, 0)
                 self.depthcam.add_interface('ros', topic= Scitosa5.DEPTHCAM_TOPIC, frame_id= Scitosa5.DEPTHCAM_FRAME_ID, tf='False')
+
+        if True: #with_chest_camera:
+            self.chestcam = DepthCamera() # Kinect() RVIZ crashes when depthcam data is visualized!?
+            #self.ptu.append(self.depthcam)
+            self.chestcam.translate(-0.010, 0.045, 1.087)
+            self.chestcam.rotate(0.000, -0.8, 0.000) #-1.571)
+            self.append(self.chestcam)
+
+            # set the near clip very low,
+            # otherwise the depthcam scans through objects within the clipping area!
+            self.chestcam.properties(cam_near = 0.1)
+
+            # workaround for point cloud with offset, the bpy stuff means we cannot have both cameras?
+            self.chestcam.properties(cam_width = 640, cam_height = 480, cam_focal = 28.5)
+            bpy.context.scene.render.resolution_x = 640
+            bpy.context.scene.render.resolution_y = 480
+
+            self.chestcam.add_interface('ros', topic= Scitosa5.CHESTHCAM_TOPIC, frame_id= Scitosa5.CHESTCAM_FRAME_ID, tf='True')
